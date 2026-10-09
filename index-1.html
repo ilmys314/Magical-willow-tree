@@ -1,0 +1,1055 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0c1033">
+<title>شجرة الصفصاف السحرية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#f6eeff; --pink:#ff9ccf; --gold:#ffd9a0; --lav:#b9a6ff;
+    --glass:rgba(16,20,64,.58); --line:rgba(255,185,225,.30);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:#0c1033;color:var(--ink);
+    font-family:'Tajawal','Segoe UI',Tahoma,sans-serif;overflow:hidden;
+    -webkit-tap-highlight-color:transparent}
+  #stage{position:fixed;inset:0}
+  #stage canvas{display:block;width:100%;height:100%;touch-action:none}
+  .vignette{position:fixed;inset:0;pointer-events:none;
+    background:radial-gradient(ellipse at 50% 46%,transparent 52%,rgba(8,10,40,.62) 100%)}
+
+  header{position:fixed;top:max(14px,env(safe-area-inset-top));left:0;right:0;
+    text-align:center;pointer-events:none;padding:0 16px}
+  header h1{font-family:'Aref Ruqaa',serif;font-weight:700;
+    font-size:clamp(1.7rem,5.4vw,2.8rem);letter-spacing:.02em;
+    text-shadow:0 0 16px rgba(255,150,210,.75),0 0 44px rgba(150,170,255,.6)}
+  header p{font-size:clamp(.82rem,2.6vw,1rem);opacity:.88;margin-top:4px;font-weight:300}
+  #count{display:inline-block;margin-top:10px;padding:4px 12px;border-radius:999px;
+    background:var(--glass);border:1px solid var(--line);font-size:.8rem;
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+
+  .hint{position:fixed;left:0;right:0;bottom:calc(max(18px,env(safe-area-inset-bottom)) + 62px);
+    text-align:center;font-size:.78rem;opacity:.65;pointer-events:none;padding:0 20px;font-weight:300}
+
+  .fab{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));
+    transform:translateX(-50%);border:1px solid var(--line);cursor:pointer;
+    padding:13px 26px;border-radius:999px;font:inherit;font-weight:700;font-size:1rem;color:var(--ink);
+    background:linear-gradient(135deg,rgba(255,140,200,.45),rgba(130,150,255,.45));
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    box-shadow:0 0 24px rgba(255,140,200,.45),0 0 60px rgba(130,150,255,.25);
+    transition:transform .3s,opacity .3s,box-shadow .3s;animation:breathe 3.2s ease-in-out infinite}
+  .fab:hover{box-shadow:0 0 34px rgba(255,140,200,.7),0 0 80px rgba(130,150,255,.4)}
+  .fab.hide{opacity:0;pointer-events:none;transform:translateX(-50%) translateY(20px)}
+  @keyframes breathe{50%{box-shadow:0 0 36px rgba(255,140,200,.7),0 0 70px rgba(130,150,255,.4)}}
+
+  .sheet{position:fixed;left:50%;bottom:0;width:min(580px,100%);
+    transform:translate(-50%,115%);transition:transform .5s cubic-bezier(.2,.9,.2,1);
+    padding:22px 20px max(22px,env(safe-area-inset-bottom));
+    background:var(--glass);border:1px solid var(--line);border-bottom:0;
+    border-radius:26px 26px 0 0;
+    backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+    box-shadow:0 -10px 60px rgba(120,110,255,.3)}
+  .sheet.open{transform:translate(-50%,0)}
+  .sheet h2{font-family:'Aref Ruqaa',serif;font-size:1.45rem;margin-bottom:12px;
+    text-shadow:0 0 14px rgba(255,150,210,.6)}
+  .sheet .close{position:absolute;top:14px;left:16px;width:34px;height:34px;border-radius:50%;
+    border:1px solid var(--line);background:transparent;color:var(--ink);font-size:1.3rem;cursor:pointer}
+  textarea,input[type=text]{width:100%;font:inherit;color:var(--ink);
+    background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:16px;
+    padding:12px 14px;outline:none;transition:border-color .2s,box-shadow .2s}
+  textarea{resize:none;min-height:96px;line-height:1.8}
+  textarea:focus,input:focus{border-color:var(--pink);box-shadow:0 0 0 3px rgba(255,156,207,.2)}
+  ::placeholder{color:rgba(246,238,255,.5)}
+  .row{display:flex;gap:10px;margin-top:10px;align-items:center}
+  .row input{flex:1}
+  #cnt{font-size:.78rem;opacity:.65;min-width:54px;text-align:left;direction:ltr}
+  #send{margin-top:12px;width:100%;padding:13px;border:0;border-radius:16px;cursor:pointer;
+    font:inherit;font-weight:700;font-size:1.02rem;color:#2a1240;
+    background:linear-gradient(135deg,#ffd9a0,#ff9ccf 60%,#b9a6ff);
+    box-shadow:0 0 26px rgba(255,156,207,.5);transition:transform .15s,opacity .2s}
+  #send:active{transform:scale(.98)}
+  #send:disabled{opacity:.5;cursor:default}
+
+  .tip{position:fixed;pointer-events:none;padding:6px 12px;border-radius:999px;
+    background:var(--glass);border:1px solid var(--line);font-size:.85rem;white-space:nowrap;
+    transform:translate(-50%,-150%);opacity:0;transition:opacity .15s;
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+  .tip.on{opacity:1}
+
+  .toast{position:fixed;left:50%;top:max(110px,calc(env(safe-area-inset-top) + 100px));
+    transform:translate(-50%,-14px);padding:10px 20px;border-radius:999px;
+    background:var(--glass);border:1px solid var(--line);opacity:0;pointer-events:none;
+    transition:opacity .35s,transform .35s;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  .toast.on{opacity:1;transform:translate(-50%,0)}
+
+  .modal{position:fixed;inset:0;display:grid;place-items:center;padding:20px;
+    background:rgba(6,8,36,.55);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+    opacity:0;visibility:hidden;transition:opacity .35s,visibility .35s}
+  .modal.open{opacity:1;visibility:visible}
+  .card{position:relative;width:min(460px,100%);padding:34px 26px 22px;border-radius:26px;text-align:center;
+    background:linear-gradient(160deg,rgba(40,36,110,.88),rgba(24,22,76,.88));
+    border:1px solid var(--line);box-shadow:0 0 70px rgba(255,140,200,.35),0 0 140px rgba(120,130,255,.25);
+    transform:scale(.85) translateY(20px);transition:transform .5s cubic-bezier(.2,1.2,.3,1)}
+  .modal.open .card{transform:none}
+  .card .spark{font-size:1.7rem;color:var(--gold);text-shadow:0 0 18px var(--pink);margin-bottom:10px}
+  .card .body{font-size:1.2rem;line-height:2;white-space:pre-wrap;word-break:break-word;font-weight:500}
+  .card footer{display:flex;justify-content:space-between;gap:10px;margin-top:20px;
+    padding-top:14px;border-top:1px dashed var(--line);font-size:.85rem;opacity:.8}
+  .card .x{position:absolute;top:12px;left:14px;width:34px;height:34px;border-radius:50%;
+    border:1px solid var(--line);background:transparent;color:var(--ink);font-size:1.3rem;cursor:pointer}
+  @media (prefers-reduced-motion:reduce){.fab{animation:none}}
+  [hidden]{display:none!important}
+  .dock{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);
+    display:flex;gap:10px;align-items:center;transition:transform .3s,opacity .3s}
+  .dock.hide{opacity:0;pointer-events:none;transform:translateX(-50%) translateY(20px)}
+  .dock .fab{position:static;transform:none;padding:13px 22px}
+  .rnd{border:1px solid var(--line);cursor:pointer;padding:13px 16px;border-radius:999px;font:inherit;font-weight:500;
+    font-size:1rem;color:var(--ink);white-space:nowrap;background:var(--glass);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:box-shadow .3s}
+  .rnd:hover{box-shadow:0 0 26px rgba(150,170,255,.55)}
+  .rnd span{display:none}
+  @media (min-width:520px){.rnd span{display:inline}}
+  .door{position:fixed;left:max(14px,env(safe-area-inset-left));bottom:max(18px,env(safe-area-inset-bottom));
+    width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--glass);
+    font-size:1.15rem;cursor:pointer;opacity:.5;transition:opacity .25s;
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+  .door:hover,.door:focus-visible{opacity:1}
+  .btn{width:100%;padding:12px;border:0;border-radius:14px;cursor:pointer;font:inherit;font-weight:700;color:#2a1240;
+    background:linear-gradient(135deg,#ffd9a0,#ff9ccf 60%,#b9a6ff)}
+  .btn:disabled{opacity:.5;cursor:default}
+  .btn.danger{background:linear-gradient(135deg,#ff8a9b,#ff5c7a);color:#fff;margin-top:16px}
+  .card.admin{text-align:start;max-height:84vh;overflow:auto;width:min(520px,100%)}
+  .card.admin h2{font-family:'Aref Ruqaa',serif;font-size:1.5rem;margin-bottom:14px;text-align:center}
+  .card.admin input{width:100%;font:inherit;color:var(--ink);background:rgba(255,255,255,.07);
+    border:1px solid var(--line);border-radius:16px;padding:12px 14px;outline:none;margin-bottom:10px;
+    direction:ltr;text-align:left}
+  .card.admin input:focus{border-color:var(--pink);box-shadow:0 0 0 3px rgba(255,156,207,.2)}
+  .err{color:#ffb4c0;font-size:.85rem;min-height:1.3em;margin-top:8px;text-align:center}
+  .aBar{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:.85rem;margin-bottom:8px}
+  .aBar span{min-width:0;overflow:hidden;text-overflow:ellipsis;direction:ltr}
+  .aBar button{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;
+    padding:6px 14px;font:inherit;cursor:pointer;flex:none}
+  .aHint{font-size:.8rem;opacity:.7;margin-bottom:10px;line-height:1.7}
+  #aList{list-style:none;display:grid;gap:8px}
+  #aList li{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);
+    border-radius:14px;background:rgba(255,255,255,.05)}
+  #aList .m{flex:1;min-width:0}
+  #aList .m b{display:block;font-size:.85rem;color:var(--gold)}
+  #aList .m span{display:block;word-break:break-word;white-space:pre-wrap;line-height:1.7}
+  #aList .m time{font-size:.72rem;opacity:.6}
+  #aList .del{border:0;background:rgba(255,92,122,.22);color:#ffb4c0;width:38px;height:38px;border-radius:12px;
+    cursor:pointer;font-size:1.05rem;flex:none}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div class="vignette"></div>
+
+<header>
+  <h1>شجرة الصفصاف السحرية</h1>
+  <p>اكتب رسالة وعلّقها على الأغصان… لتصبح ثمرةً مضيئة يقرؤها كل من يمرّ من هنا</p>
+  <span id="count">…</span>
+</header>
+
+<div class="hint">اسحب للدوران · قرّب بإصبعين · المس أي ثمرة مضيئة لتقرأ رسالتها · 🎲 لرسالة عشوائية</div>
+
+<div class="dock" id="dock">
+  <button class="fab" id="fab" type="button">✦ علّق رسالتك</button>
+  <button class="rnd" id="rnd" type="button" aria-label="رسالة عشوائية" title="رسالة عشوائية">🎲<span> رسالة عشوائية</span></button>
+</div>
+<button class="door" id="door" type="button" aria-label="بوابة المشرف" title="بوابة المشرف" hidden>🚪</button>
+
+<form class="sheet" id="sheet" autocomplete="off" aria-label="رسالة جديدة">
+  <button class="close" id="sClose" type="button" aria-label="إغلاق">×</button>
+  <h2>رسالة جديدة للشجرة</h2>
+  <textarea id="text" maxlength="280" placeholder="اكتب ما في قلبك… وستحرسه الأغصان" required></textarea>
+  <div class="row">
+    <input id="name" type="text" maxlength="24" placeholder="اسمك (اختياري)">
+    <span id="cnt">0 / 280</span>
+  </div>
+  <button id="send" type="submit">علّقها على الشجرة ✨</button>
+</form>
+
+<div class="tip" id="tip"></div>
+<div class="toast" id="toast" role="status"></div>
+
+<div class="modal" id="modal" aria-hidden="true">
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="mFrom">
+    <button class="x" id="mClose" type="button" aria-label="إغلاق">×</button>
+    <div class="spark">✦</div>
+    <p class="body" id="mBody"></p>
+    <footer><span id="mFrom"></span><time id="mDate"></time></footer>
+    <button class="btn danger" id="mDel" type="button" hidden>🗑 حذف هذه الرسالة</button>
+  </div>
+</div>
+
+<div class="modal" id="adminModal" aria-hidden="true">
+  <div class="card admin" role="dialog" aria-modal="true" aria-labelledby="aTitle">
+    <button class="x" id="aClose" type="button" aria-label="إغلاق">×</button>
+    <h2 id="aTitle">بوابة المشرف</h2>
+    <form id="aLogin">
+      <input id="aEmail" type="email" placeholder="البريد الإلكتروني" autocomplete="username" required>
+      <input id="aPass" type="password" placeholder="كلمة المرور" autocomplete="current-password" required>
+      <button class="btn" id="aGo" type="submit">دخول</button>
+    </form>
+    <p class="err" id="aErr" role="alert"></p>
+    <div id="aPanel" hidden>
+      <div class="aBar"><span id="aWho"></span><button id="aOut" type="button">تسجيل الخروج</button></div>
+      <p class="aHint">زر 🗑 يحذف الرسالة نهائيًا من الشجرة لدى الجميع. وعند فتح أي رسالة على الشجرة يظهر زر حذف أيضًا.</p>
+      <ul id="aList"></ul>
+    </div>
+  </div>
+</div>
+
+<noscript><p style="position:fixed;inset:0;display:grid;place-items:center">يحتاج الموقع إلى تفعيل جافاسكربت.</p></noscript>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { Reflector } from 'three/addons/objects/Reflector.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+
+/* ════════════════════════════ الإعدادات ════════════════════════════
+   API_URL: اتركه فارغًا ليحفظ كل متصفح رسائله محليًا (للتجربة).
+   لجعل الرسائل ظاهرة لكل الزوار: ضع رابط خادم يدعم
+     GET  → يعيد مصفوفة JSON من الرسائل [{id,name,text,ts}, ...]
+     POST → يستقبل رسالة واحدة بنفس الشكل
+   وتذكّر أن تتحقق من الطول وتنظّف النص في الخادم. */
+const CONFIG = { API_URL: '', MAX_LEN: 280, MAX_ORBS: 400, POLL_MS: 30000 };
+
+/* ── Firebase: لمشاركة الرسائل بين كل الزوار وحفظها دائمًا.
+   انسخ القيم من: Firebase Console ← Project settings ← Your apps ← firebaseConfig
+   وإن تُركت فارغة تعمل الشجرة بالحفظ المحلي فقط (للتجربة). ── */
+const FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyCx2oxElS56-nkmYphv4hcQLLs-HehmDkE',
+  authDomain: 'wise-willow-tree.firebaseapp.com',
+  projectId: 'wise-willow-tree',
+  storageBucket: 'wise-willow-tree.firebasestorage.app',
+  messagingSenderId: '579835760084',
+  appId: '1:579835760084:web:ab2441a57c287dbc449a41'
+};
+
+const LOW = matchMedia('(max-width: 720px)').matches || (navigator.hardwareConcurrency || 8) <= 4;
+const Q = LOW ? 0.6 : 1;               // معامل الجودة (الكثافة)
+const V3 = THREE.Vector3;
+
+/* ── مولّد عشوائي ثابت: الشجرة نفسها في كل زيارة ── */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const rnd = mulberry32(20261009);
+const rr = (a,b)=>a+(b-a)*rnd();
+const sm = (a,b,x)=>{const t=Math.min(1,Math.max(0,(x-a)/(b-a)));return t*t*(3-2*t)};
+function hashStr(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0}
+
+/* ════════════════════════════ المحرّك ════════════════════════════ */
+let renderer;
+try{
+  renderer = new THREE.WebGLRenderer({ antialias:false, powerPreference:'high-performance' });
+}catch(e){
+  document.body.insertAdjacentHTML('beforeend','<p style="position:fixed;inset:0;display:grid;place-items:center;padding:30px;text-align:center">متصفحك لا يدعم WebGL، جرّب متصفحًا أحدث.</p>');
+  throw e;
+}
+const PR = Math.min(window.devicePixelRatio || 1, LOW ? 1.5 : 1.75);
+renderer.setPixelRatio(PR);
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.NoToneMapping;
+renderer.setClearColor(0x0c1033);
+document.getElementById('stage').appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const FOG_COL = new THREE.Color('#9a96d6');
+scene.fog = new THREE.FogExp2(FOG_COL, 0.03);
+
+const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 400);
+const U = { uTime:{value:0}, uScale:{value:900} };
+function updateScale(){
+  U.uScale.value = renderer.domElement.height / (2*Math.tan(THREE.MathUtils.degToRad(camera.fov)/2));
+}
+function applyAspect(){
+  const a = innerWidth/innerHeight;
+  camera.aspect = a;
+  camera.fov = a < 1 ? 45 + Math.min(28,(1-a)*55) : 45;
+  camera.updateProjectionMatrix();
+  updateScale();
+}
+applyAspect();
+camera.position.set(0, 4.6, innerWidth/innerHeight < 0.8 ? 19.5 : 16);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 3.4, 0);
+controls.enableDamping = true; controls.dampingFactor = 0.06;
+controls.enablePan = false;
+controls.minDistance = 6; controls.maxDistance = 30;
+controls.minPolarAngle = 0.5; controls.maxPolarAngle = Math.PI/2 - 0.02;
+controls.autoRotate = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+controls.autoRotateSpeed = 0.35;
+controls.update();
+
+/* ════════════════════════════ السماء ════════════════════════════ */
+const sky = new THREE.Mesh(
+  new THREE.SphereGeometry(150, 32, 16),
+  new THREE.ShaderMaterial({
+    side: THREE.BackSide, depthWrite:false, fog:false,
+    uniforms:{
+      uTop:{value:new THREE.Color('#2c4296')},
+      uMid:{value:new THREE.Color('#6f76c8')},
+      uHor:{value:FOG_COL.clone()}
+    },
+    vertexShader:`varying vec3 vP; void main(){ vP=normalize(position); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
+    fragmentShader:`uniform vec3 uTop,uMid,uHor; varying vec3 vP;
+      void main(){ float y=vP.y;
+        vec3 c=mix(uHor,uMid,smoothstep(0.0,0.30,y));
+        c=mix(c,uTop,smoothstep(0.25,0.90,y));
+        gl_FragColor=vec4(c,1.); }`
+  })
+);
+scene.add(sky);
+
+/* ════════════════════════════ الإضاءة ════════════════════════════ */
+scene.add(new THREE.HemisphereLight(0xa9b8ff, 0x3a3f7a, 2.6));
+const moon = new THREE.DirectionalLight(0xb7c3ff, 1.6); moon.position.set(-6,12,8); scene.add(moon);
+const pinkA = new THREE.PointLight(0xff8fc8, 70, 18, 2); pinkA.position.set(0,2.6,0); scene.add(pinkA);
+const pinkB = new THREE.PointLight(0xff9fd4, 40, 16, 2); pinkB.position.set(0,5.2,3.2); scene.add(pinkB);
+
+/* ════════════════════════════ الأرض والجدول ════════════════════════════ */
+function streamZ(x){ return 5.2 + 1.1*Math.sin(x*0.22+0.6) + 0.5*Math.sin(x*0.5); }
+function groundH(x,z){
+  let h = 0.16*Math.sin(x*0.45+1.2)*Math.cos(z*0.4+0.3) + 0.09*Math.sin(x*1.1+z*0.8) + 0.05*Math.sin(z*1.7);
+  h += 0.35*Math.exp(-(x*x+z*z)/14);                 // تلّة تحت الشجرة
+  const d = Math.abs(z - streamZ(x));
+  const bank = sm(0.9, 1.9, d);
+  const floor = -0.42;
+  return floor + (h + 0.28 - floor)*bank;
+}
+const placeOK = (x,z)=> Math.abs(z - streamZ(x)) > 3.2;
+
+const SEG = LOW ? 200 : 320;
+const gg = new THREE.PlaneGeometry(120,120,SEG,SEG);
+gg.rotateX(-Math.PI/2);
+{ const p=gg.attributes.position; for(let i=0;i<p.count;i++) p.setY(i, groundH(p.getX(i), p.getZ(i))); }
+gg.computeVertexNormals();
+scene.add(new THREE.Mesh(gg, new THREE.MeshStandardMaterial({ color:0xaeb9f2, roughness:.95, metalness:0 })));
+
+/* توهّج وردي على الثلج تحت الشجرة */
+function glowTexture(){
+  const c=document.createElement('canvas'); c.width=c.height=128;
+  const g=c.getContext('2d'), gr=g.createRadialGradient(64,64,0,64,64,64);
+  gr.addColorStop(0,'rgba(255,255,255,1)'); gr.addColorStop(.25,'rgba(255,255,255,.55)');
+  gr.addColorStop(.6,'rgba(255,255,255,.12)'); gr.addColorStop(1,'rgba(255,255,255,0)');
+  g.fillStyle=gr; g.fillRect(0,0,128,128);
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; return t;
+}
+const glowTex = glowTexture();
+{
+  const disc = new THREE.Mesh(new THREE.PlaneGeometry(13,13),
+    new THREE.MeshBasicMaterial({ map:glowTex, color:new THREE.Color(1.0,0.45,0.75), transparent:true, opacity:.5, depthWrite:false, blending:THREE.AdditiveBlending, fog:false }));
+  disc.rotation.x=-Math.PI/2; disc.position.y = groundH(0,0)+0.06; scene.add(disc);
+}
+
+/* الماء العاكس */
+{
+  const shape = new THREE.Shape();
+  const up=[], dn=[];
+  for(let x=-60;x<=60;x+=1){ const zc=streamZ(x); up.push([x,-(zc-1.6)]); dn.push([x,-(zc+1.6)]); }
+  shape.moveTo(up[0][0],up[0][1]);
+  for(let i=1;i<up.length;i++) shape.lineTo(up[i][0],up[i][1]);
+  for(let i=dn.length-1;i>=0;i--) shape.lineTo(dn[i][0],dn[i][1]);
+  shape.closePath();
+  const geo = new THREE.ShapeGeometry(shape);
+  let water;
+  try{
+    const f = LOW ? 0.5 : 0.8;
+    water = new Reflector(geo, {
+      color:0x8896d8, clipBias:0.003,
+      textureWidth:Math.floor(innerWidth*PR*f), textureHeight:Math.floor(innerHeight*PR*f)
+    });
+    water.material.side = THREE.DoubleSide;
+  }catch(e){
+    console.warn('Reflector unavailable, using plain water', e);
+    water = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color:0x2b3a7a, transparent:true, opacity:.88, side:THREE.DoubleSide }));
+  }
+  water.rotation.x = -Math.PI/2; water.position.y = -0.05;
+  scene.add(water);
+  window.__water = water;
+}
+
+/* حجارة في الجدول */
+{
+  const stone = new THREE.MeshStandardMaterial({ color:0x20285a, roughness:.8, flatShading:true });
+  const geo = new THREE.IcosahedronGeometry(0.35,1);
+  for(let i=0;i<10;i++){
+    const x=rr(-9,9), m=new THREE.Mesh(geo,stone), s=rr(.6,1.5);
+    m.position.set(x,-0.12,streamZ(x)+rr(-.9,.9)); m.scale.set(s,s*.6,s*rr(.8,1.3)); m.rotation.y=rnd()*6;
+    scene.add(m);
+  }
+}
+
+/* ════════════════════════════ الغابة البعيدة ════════════════════════════ */
+{
+  // صنوبر (نسخ متكررة)
+  const parts=[];
+  for(let i=0;i<4;i++){ const g=new THREE.ConeGeometry(1.5-i*0.3,1.9,7,1); g.translate(0,1.1+i*1.05,0); parts.push(g); }
+  const geo=mergeGeometries(parts);
+  const mat=new THREE.MeshStandardMaterial({ color:0x1d3566, roughness:.9, flatShading:true });
+  const n=Math.round(46*Q), inst=new THREE.InstancedMesh(geo,mat,n);
+  const m4=new THREE.Matrix4(), q=new THREE.Quaternion(), sc=new V3(), ps=new V3(), up=new V3(0,1,0);
+  let k=0;
+  for(let tries=0;k<n&&tries<600;tries++){
+    const a=rnd()*Math.PI*2, r=rr(13,42), x=Math.cos(a)*r, z=Math.sin(a)*r;
+    if(!placeOK(x,z)) continue;
+    const s=rr(1.1,2.3);
+    q.setFromAxisAngle(up,rnd()*6.28);
+    m4.compose(ps.set(x,groundH(x,z)-0.15,z), q, sc.set(s,s*rr(.9,1.4),s));
+    inst.setMatrixAt(k++,m4);
+  }
+  inst.count=k; inst.instanceMatrix.needsUpdate=true; scene.add(inst);
+
+  // أشجار عارية
+  function bareGeo(seed){
+    const r=mulberry32(seed), pts=[];
+    (function grow(p,dir,len,depth){
+      if(depth===0||len<0.14) return;
+      const q2=p.clone().addScaledVector(dir,len);
+      pts.push(p.x,p.y,p.z,q2.x,q2.y,q2.z);
+      const c = depth>3?2:3;
+      for(let i=0;i<c;i++){
+        const d=dir.clone().add(new V3(r()-.5,r()*0.35-0.05,r()-.5).multiplyScalar(1.1)).normalize();
+        grow(q2,d,len*(0.68+r()*0.12),depth-1);
+      }
+    })(new V3(0,0,0),new V3(0,1,0),2.2,6);
+    const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(pts,3)); return g;
+  }
+  const geos=[bareGeo(11),bareGeo(23),bareGeo(37)];
+  const lm=new THREE.LineBasicMaterial({ color:0x232b5c });
+  for(let i=0,c=0;c<Math.round(11*Q)&&i<200;i++){
+    const a=rnd()*Math.PI*2, r=rr(10,24), x=Math.cos(a)*r, z=Math.sin(a)*r;
+    if(!placeOK(x,z)) continue;
+    const l=new THREE.LineSegments(geos[c%3],lm), s=rr(1.4,2.6);
+    l.position.set(x,groundH(x,z)-0.1,z); l.scale.setScalar(s); l.rotation.y=rnd()*6; scene.add(l); c++;
+  }
+
+  // شجيرات وردية/بنفسجية
+  const bm=[new THREE.MeshStandardMaterial({color:0x7a5aa8,roughness:.8,emissive:0x2a1048,flatShading:true}),
+            new THREE.MeshStandardMaterial({color:0xb15fa8,roughness:.8,emissive:0x40103a,flatShading:true})];
+  const bg=new THREE.IcosahedronGeometry(0.8,1);
+  for(let i=0,c=0;c<12&&i<200;i++){
+    const a=rnd()*Math.PI*2, r=rr(6,11), x=Math.cos(a)*r, z=Math.sin(a)*r;
+    if(!placeOK(x,z)) continue;
+    const b=new THREE.Mesh(bg,bm[c%2]), s=rr(.6,1.4);
+    b.position.set(x,groundH(x,z)+0.2,z); b.scale.set(s,s*.7,s); scene.add(b); c++;
+  }
+}
+
+/* ════════════════════════════ جسم الشجرة ════════════════════════════ */
+function taperedTube(curve, tubSeg, radSeg, r0, r1, o={}){
+  const { flare=0, noise=0.08, seed=0 } = o;
+  const frames = curve.computeFrenetFrames(tubSeg,false);
+  const pos=[], nor=[], idx=[], P=new V3();
+  for(let i=0;i<=tubSeg;i++){
+    const t=i/tubSeg; curve.getPointAt(t,P);
+    const N=frames.normals[i], B=frames.binormals[i];
+    const r=THREE.MathUtils.lerp(r0,r1,Math.pow(t,0.8))*(1+flare*Math.exp(-t*12));
+    for(let j=0;j<=radSeg;j++){
+      const a=j/radSeg*Math.PI*2, cx=Math.cos(a), sx=Math.sin(a);
+      const rn=r*(1+noise*Math.sin(a*3+t*9+seed)+noise*0.6*Math.sin(a*7-t*17+seed*2));
+      const nx=cx*N.x+sx*B.x, ny=cx*N.y+sx*B.y, nz=cx*N.z+sx*B.z;
+      pos.push(P.x+rn*nx,P.y+rn*ny,P.z+rn*nz); nor.push(nx,ny,nz);
+    }
+  }
+  for(let i=0;i<tubSeg;i++) for(let j=0;j<radSeg;j++){
+    const a=i*(radSeg+1)+j, b=(i+1)*(radSeg+1)+j, c=(i+1)*(radSeg+1)+j+1, d=i*(radSeg+1)+j+1;
+    idx.push(a,b,d,b,c,d);
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3));
+  g.setIndex(idx); return g;
+}
+
+const tree = new THREE.Group(); scene.add(tree);
+const barkMat = new THREE.MeshStandardMaterial({ color:0x2b3170, roughness:.9, emissive:0x1a1450, emissiveIntensity:.7, side:THREE.DoubleSide });
+
+/* بيانات الخيوط المتدلية */
+const SEGS = 12;
+const L_pos=[],L_t=[],L_ph=[],L_sh=[];                         // خطوط
+const P_pos=[],P_t=[],P_ph=[],P_sz=[],P_sd=[],P_mx=[];         // أضواء
+const F_pos=[],F_t=[],F_ph=[],F_sz=[],F_sh=[];                 // أوراق
+const anchors=[];                                              // أماكن تعليق الثمار
+
+function strandPoint(p0,ex,ez,L,s,ox,oz,out){
+  return out.set(p0.x+(ex-p0.x)*s*s+ox*(0.3+s), p0.y-L*s, p0.z+(ez-p0.z)*s*s+oz*(0.3+s));
+}
+function addStrand(p0,out){
+  const drift=rr(0.1,0.55);
+  const ex=p0.x+out.x*drift+rr(-.18,.18), ez=p0.z+out.z*drift+rr(-.18,.18);
+  const bottom=Math.max(groundH(ex,ez)+rr(0.06,0.45),0.2);
+  const L=p0.y-bottom; if(L<0.9) return;
+  const ph=rnd()*Math.PI*2, radial=Math.hypot(p0.x,p0.z);
+  const a=new V3(), b=new V3();
+  for(let k=0;k<2;k++){
+    const ox=k?rr(-.12,.12):0, oz=k?rr(-.12,.12):0, shade=rr(0.2,1);
+    for(let i=0;i<SEGS;i++){
+      const s0=i/SEGS, s1=(i+1)/SEGS;
+      strandPoint(p0,ex,ez,L,s0,ox,oz,a); strandPoint(p0,ex,ez,L,s1,ox,oz,b);
+      L_pos.push(a.x,a.y,a.z,b.x,b.y,b.z); L_t.push(s0,s1); L_ph.push(ph,ph); L_sh.push(shade,shade);
+    }
+  }
+  const n=Math.max(2,Math.floor(L/rr(0.26,0.42)*Q));
+  for(let j=0;j<n;j++){
+    const s=0.04+0.94*((j+rnd()*0.8)/n);
+    strandPoint(p0,ex,ez,L,s,0,0,a);
+    P_pos.push(a.x,a.y,a.z); P_t.push(s); P_ph.push(ph); P_sz.push(rr(0.1,0.2)); P_sd.push(rnd()); P_mx.push(Math.min(1,s*0.5+rnd()*0.6));
+    if(s>0.3&&s<0.8&&a.y>1.2&&Math.hypot(a.x,a.z)>1.2&&rnd()<0.3) anchors.push({x:a.x,y:a.y,z:a.z,t:s,ph});
+  }
+  if(radial>1.8){
+    for(let i=1;i<SEGS;i+=2){
+      const s=i/SEGS; strandPoint(p0,ex,ez,L,s,rr(-.08,.08),rr(-.08,.08),a);
+      F_pos.push(a.x,a.y,a.z); F_t.push(s); F_ph.push(ph); F_sz.push(rr(0.28,0.5)); F_sh.push(rr(0.1,1));
+    }
+  }
+}
+function strandsFromCurve(curve,count,tMin){
+  for(let i=0;i<count;i++){
+    const p=curve.getPointAt(rr(tMin,1));
+    const out=new V3(p.x,0,p.z); if(out.lengthSq()<1e-4) out.set(0,0,1); out.normalize();
+    addStrand(p,out);
+  }
+}
+
+/* الجذع */
+{
+  const trunk=new THREE.CatmullRomCurve3([
+    new V3(0.1,-0.5,0),new V3(0.25,1.2,0.1),new V3(-0.05,2.6,-0.1),new V3(-0.2,3.6,0.05),new V3(0,4.3,0)
+  ]);
+  tree.add(new THREE.Mesh(taperedTube(trunk,40,16,0.8,0.34,{flare:0.9}),barkMat));
+}
+/* الأغصان الرئيسية + الفروع الصغيرة */
+const LIMBS=8;
+for(let i=0;i<LIMBS;i++){
+  const th=i/LIMBS*Math.PI*2+rr(-.25,.25);
+  const dir=new V3(Math.cos(th),0,Math.sin(th));
+  const R=rr(3.2,4.6), H=rr(5.7,7.0);
+  const base=new V3(rr(-.1,.1),3.2+rr(0,.4),rr(-.1,.1));
+  const curve=new THREE.CatmullRomCurve3([
+    base,
+    base.clone().add(new V3(dir.x*R*0.22,(H-3.2)*0.5,dir.z*R*0.22)),
+    new V3(dir.x*R*0.55,H,dir.z*R*0.55),
+    new V3(dir.x*R*0.88,H-0.55-rr(0,0.6),dir.z*R*0.88),
+    new V3(dir.x*R,H-1.5-rr(0,.8),dir.z*R)
+  ]);
+  tree.add(new THREE.Mesh(taperedTube(curve,36,8,rr(0.26,0.32),0.05,{noise:.1,seed:i}),barkMat));
+  strandsFromCurve(curve,Math.round(40*Q),0.28);
+
+  for(let b=0;b<5;b++){
+    const t=rr(0.35,0.85), p=curve.getPointAt(t), tg=curve.getTangentAt(t);
+    const h=tg.clone().setY(0); if(h.lengthSq()<1e-4) h.set(dir.x,0,dir.z); h.normalize();
+    const side=new V3(-h.z,0,h.x).multiplyScalar(rr(-1,1));
+    const sd=h.clone().add(side).normalize(), len=rr(1.0,2.0);
+    const c2=new THREE.CatmullRomCurve3([
+      p.clone(),
+      p.clone().addScaledVector(sd,len*0.5).add(new V3(0,0.35,0)),
+      p.clone().addScaledVector(sd,len).add(new V3(0,-0.25,0))
+    ]);
+    tree.add(new THREE.Mesh(taperedTube(c2,12,5,0.07,0.015,{noise:.05,seed:b}),barkMat));
+    strandsFromCurve(c2,Math.round(16*Q),0.1);
+  }
+}
+
+/* ── ظلال الـ GLSL المشتركة للتمايل ── */
+const SWAY = `
+vec3 sway(vec3 p,float aT,float ph,float t){
+  float w=aT*aT;
+  p.x+=(sin(t*0.7+ph+p.y*0.6)*0.10+sin(t*0.31+ph*1.7)*0.05)*w;
+  p.z+=cos(t*0.6+ph*1.3+p.y*0.5)*0.08*w;
+  return p;
+}`;
+function swayOffset(base,aT,ph,t,o){
+  const w=aT*aT;
+  o.x=(Math.sin(t*0.7+ph+base.y*0.6)*0.10+Math.sin(t*0.31+ph*1.7)*0.05)*w;
+  o.z=Math.cos(t*0.6+ph*1.3+base.y*0.5)*0.08*w;
+}
+const F32=(a,n)=>new THREE.Float32BufferAttribute(a,n);
+
+/* الخيوط (خطوط داكنة) */
+{
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',F32(L_pos,3)); g.setAttribute('aT',F32(L_t,1));
+  g.setAttribute('aPhase',F32(L_ph,1)); g.setAttribute('aShade',F32(L_sh,1));
+  const m=new THREE.ShaderMaterial({
+    uniforms:{uTime:U.uTime},
+    vertexShader:`uniform float uTime; attribute float aT; attribute float aPhase; attribute float aShade;
+      varying float vT; varying float vS; ${SWAY}
+      void main(){ vT=aT; vS=aShade; vec3 p=sway(position,aT,aPhase,uTime);
+        gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.); }`,
+    fragmentShader:`varying float vT; varying float vS;
+      void main(){ vec3 a=vec3(0.045,0.07,0.24), b=vec3(0.16,0.18,0.48), pk=vec3(0.42,0.12,0.30);
+        vec3 c=mix(a,b,vS); c=mix(c,pk,smoothstep(0.3,1.0,vT)*0.45*vS); gl_FragColor=vec4(c,1.); }`
+  });
+  const s=new THREE.LineSegments(g,m); s.frustumCulled=false; tree.add(s);
+}
+/* الأوراق (كتل ناعمة داكنة تعطي الكثافة) */
+{
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',F32(F_pos,3)); g.setAttribute('aT',F32(F_t,1));
+  g.setAttribute('aPhase',F32(F_ph,1)); g.setAttribute('aSize',F32(F_sz,1)); g.setAttribute('aShade',F32(F_sh,1));
+  const m=new THREE.ShaderMaterial({
+    uniforms:{uTime:U.uTime,uScale:U.uScale}, transparent:true, depthWrite:false,
+    vertexShader:`uniform float uTime; uniform float uScale; attribute float aT; attribute float aPhase;
+      attribute float aSize; attribute float aShade; varying float vS; varying float vT; ${SWAY}
+      void main(){ vec3 p=sway(position,aT,aPhase,uTime); vec4 mv=modelViewMatrix*vec4(p,1.);
+        gl_PointSize=aSize*uScale/-mv.z; gl_Position=projectionMatrix*mv; vS=aShade; vT=aT; }`,
+    fragmentShader:`varying float vS; varying float vT;
+      void main(){ float d=length(gl_PointCoord-0.5)*2.; float a=smoothstep(1.,0.15,d)*0.5; if(a<0.01) discard;
+        vec3 c=mix(vec3(0.05,0.08,0.28),vec3(0.20,0.20,0.55),vS);
+        c=mix(c,vec3(0.45,0.15,0.40),smoothstep(0.4,1.,vT)*0.35*vS); gl_FragColor=vec4(c,a); }`
+  });
+  const p=new THREE.Points(g,m); p.frustumCulled=false; p.renderOrder=1; tree.add(p);
+}
+/* الأضواء المتلألئة */
+{
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',F32(P_pos,3)); g.setAttribute('aT',F32(P_t,1)); g.setAttribute('aPhase',F32(P_ph,1));
+  g.setAttribute('aSize',F32(P_sz,1)); g.setAttribute('aSeed',F32(P_sd,1)); g.setAttribute('aMix',F32(P_mx,1));
+  const m=new THREE.ShaderMaterial({
+    uniforms:{uTime:U.uTime,uScale:U.uScale}, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
+    vertexShader:`uniform float uTime; uniform float uScale; attribute float aT; attribute float aPhase;
+      attribute float aSize; attribute float aSeed; attribute float aMix; varying vec3 vCol; varying float vA; ${SWAY}
+      void main(){ vec3 p=sway(position,aT,aPhase,uTime); vec4 mv=modelViewMatrix*vec4(p,1.);
+        float tw=0.65+0.35*sin(uTime*(1.2+aSeed*2.0)+aSeed*40.);
+        gl_PointSize=aSize*(0.7+tw*0.5)*uScale/-mv.z; gl_Position=projectionMatrix*mv;
+        vCol=mix(vec3(1.0,0.82,0.6),vec3(1.0,0.45,0.78),aMix)*(0.9+tw*0.6); vA=tw; }`,
+    fragmentShader:`varying vec3 vCol; varying float vA;
+      void main(){ float d=length(gl_PointCoord-0.5)*2.; if(d>1.) discard;
+        float g=exp(-d*d*4.5); float core=smoothstep(0.32,0.0,d);
+        gl_FragColor=vec4(vCol*(g*0.6+core*0.7), g*vA); }`
+  });
+  const p=new THREE.Points(g,m); p.frustumCulled=false; p.renderOrder=2; tree.add(p);
+}
+
+/* ════════════════════════════ ثلج ويراعات ════════════════════════════ */
+function makeParticles({count,box,height,color,size,speed,swayAmt,opacity}){
+  const pos=new Float32Array(count*3), sd=new Float32Array(count*3);
+  for(let i=0;i<count;i++){
+    pos[i*3]=(rnd()-.5)*box; pos[i*3+1]=rnd()*height; pos[i*3+2]=(rnd()-.5)*box;
+    sd[i*3]=rnd(); sd[i*3+1]=rnd(); sd[i*3+2]=rnd();
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.BufferAttribute(pos,3)); g.setAttribute('aSeed',new THREE.BufferAttribute(sd,3));
+  const m=new THREE.ShaderMaterial({
+    uniforms:{uTime:U.uTime,uScale:U.uScale,uH:{value:height},uSpeed:{value:speed},uSway:{value:swayAmt},
+              uSize:{value:size},uColor:{value:new THREE.Color(color)},uOp:{value:opacity}},
+    transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
+    vertexShader:`uniform float uTime,uScale,uH,uSpeed,uSway,uSize; attribute vec3 aSeed; varying float vA;
+      void main(){ vec3 p=position;
+        p.y=mod(p.y-uTime*uSpeed*(0.5+aSeed.x),uH);
+        p.x+=sin(uTime*0.4+aSeed.y*6.2831)*uSway; p.z+=cos(uTime*0.33+aSeed.z*6.2831)*uSway;
+        vec4 mv=modelViewMatrix*vec4(p,1.);
+        float tw=0.6+0.4*sin(uTime*(0.8+aSeed.x*1.8)+aSeed.y*30.);
+        gl_PointSize=uSize*uScale/-mv.z*(0.6+0.8*aSeed.z); gl_Position=projectionMatrix*mv;
+        vA=tw*smoothstep(0.,1.,p.y)*smoothstep(uH,uH-2.,p.y); }`,
+    fragmentShader:`uniform vec3 uColor; uniform float uOp; varying float vA;
+      void main(){ float d=length(gl_PointCoord-.5)*2.; float a=smoothstep(1.,0.,d); a*=a;
+        gl_FragColor=vec4(uColor*1.2,a*vA*uOp); }`
+  });
+  const p=new THREE.Points(g,m); p.frustumCulled=false; p.renderOrder=3; return p;
+}
+scene.add(makeParticles({count:Math.round(750*Q),box:46,height:16,color:0xdfe6ff,size:0.07,speed:0.55,swayAmt:0.6,opacity:0.9}));
+scene.add(makeParticles({count:Math.round(150*Q),box:14,height:9,color:0xffc2e6,size:0.13,speed:-0.15,swayAmt:0.9,opacity:1.3}));
+
+/* ════════════════════════════ التخزين ════════════════════════════ */
+/* ── Firebase (يُحمَّل عند الحاجة فقط) ── */
+let fb = null;
+const FB_SOURCES = [
+  ['https://cdn.jsdelivr.net/npm/firebase@10.14.1/app/+esm','https://cdn.jsdelivr.net/npm/firebase@10.14.1/firestore/+esm','https://cdn.jsdelivr.net/npm/firebase@10.14.1/auth/+esm'],
+  ['https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js','https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js','https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js']
+];
+async function initFirebase(){
+  let lastErr;
+  for(let i=0;i<FB_SOURCES.length;i++){
+    const [a,b] = FB_SOURCES[i];
+    try{
+      const [appMod, fs] = await Promise.all([import(a), import(b)]);
+      const app = appMod.initializeApp(FIREBASE_CONFIG);
+      fb = { fs, app, db: fs.getFirestore(app), src: i, auth: null, authMod: null };
+      return;
+    }catch(e){ lastErr = e; console.warn('Firebase source failed:', a, e); }
+  }
+  throw lastErr;
+}
+async function loadAuth(){            // يُحمَّل عند الحاجة فقط (عند فتح بوابة المشرف)
+  if(fb.auth) return fb.auth;
+  fb.authMod = await import(FB_SOURCES[fb.src][2]);
+  fb.auth = fb.authMod.getAuth(fb.app);
+  return fb.auth;
+}
+function subscribeFirebase(onInitial, onAdded, onRemoved, onError){
+  const { collection, query, orderBy, limitToLast, onSnapshot } = fb.fs;
+  const q = query(collection(fb.db,'messages'), orderBy('ts'), limitToLast(CONFIG.MAX_ORBS));
+  let first = true;
+  onSnapshot(q, snap=>{
+    const added = [], removed = [];
+    snap.docChanges().forEach(c=>{
+      if(c.type==='added') added.push(c.doc.data());
+      else if(c.type==='removed') removed.push(c.doc.id);
+    });
+    if(first){ first=false; onInitial(added); }
+    else { removed.forEach(onRemoved); added.forEach(onAdded); }
+  }, onError);
+}
+
+const mem = [];
+const Store = {
+  key:'willow-messages-v1',
+  async list(){
+    if(CONFIG.API_URL){ const r=await fetch(CONFIG.API_URL); if(!r.ok) throw new Error('GET '+r.status); return await r.json(); }
+    try{ return JSON.parse(localStorage.getItem(this.key)||'[]'); }catch{ return mem.slice(); }
+  },
+  async add(msg){
+    if(fb){
+      await fb.fs.setDoc(fb.fs.doc(fb.db,'messages',msg.id),{id:msg.id,name:msg.name,text:msg.text,ts:msg.ts});
+      return;
+    }
+    if(CONFIG.API_URL){
+      const r=await fetch(CONFIG.API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(msg)});
+      if(!r.ok) throw new Error('POST '+r.status); return;
+    }
+    try{ const all=JSON.parse(localStorage.getItem(this.key)||'[]'); all.push(msg); localStorage.setItem(this.key,JSON.stringify(all)); }
+    catch{ mem.push(msg); }
+  }
+};
+const now0 = Date.now();
+const SEED = [
+  ['الشجرة','كل ضوء هنا بدأ بكلمة طيبة. أهلًا بك يا عابر ✨'],
+  ['عابر ليل','أتمنى أن تجد اليوم سببًا صغيرًا للابتسام.'],
+  ['مجهول','إلى من يقرأ هذه السطور: أنت أقوى مما تظن، وأجمل مما ترى.'],
+  ['قلب هادئ','مرّ من هنا قلبٌ متعب، وخرج أخفّ.'],
+  ['صديق','ليكن الغدُ ألطف من الأمس.'],
+  ['الشجرة','اترك أثرًا جميلًا، فالأرواح تعرف النور من بعيد.']
+].map((m,i)=>({id:'seed'+i,name:m[0],text:m[1],ts:now0-(6-i)*86400000}));
+
+/* ════════════════════════════ الثمار المضيئة ════════════════════════════ */
+const PALETTE=[0xff9ccf,0xffd29a,0x9fd8ff,0xc9a6ff,0xa8ffd9,0xffb0a0];
+const orbs=new Map(), hitMeshes=[], used=[];
+const orbGeo=new THREE.SphereGeometry(0.15,24,16), shellGeo=new THREE.SphereGeometry(0.23,20,14), hitGeo=new THREE.SphereGeometry(0.46,10,8);
+const hitMat=new THREE.MeshBasicMaterial({visible:false});
+const easeOutBack=x=>{const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2)};
+const tmpO={x:0,z:0};
+const clock=new THREE.Clock();
+
+function pickSlot(id){
+  const n=anchors.length; if(!n) return null;
+  const h=hashStr(id)%n;
+  for(let k=0;k<n;k++){
+    const a=anchors[(h+k*7919)%n];
+    let ok=true;
+    for(const u of used){ const dx=u.x-a.x,dy=u.y-a.y,dz=u.z-a.z; if(dx*dx+dy*dy+dz*dz<0.55){ok=false;break;} }
+    if(ok){ used.push(a); return a; }
+  }
+  return anchors[h];
+}
+function addOrb(msg,{delay=0,celebrate=false}={}){
+  if(orbs.has(msg.id)||orbs.size>=CONFIG.MAX_ORBS) return null;
+  const slot=pickSlot(msg.id); if(!slot) return null;
+  const col=new THREE.Color(PALETTE[hashStr(msg.id+'c')%PALETTE.length]);
+  const group=new THREE.Group();
+  const core=new THREE.Mesh(orbGeo,new THREE.MeshBasicMaterial({color:col.clone().multiplyScalar(2.3)})); core.position.y=-0.2;
+  const shell=new THREE.Mesh(shellGeo,new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.28,blending:THREE.AdditiveBlending,depthWrite:false})); shell.position.y=-0.2;
+  const halo=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:col.clone().multiplyScalar(1.2),transparent:true,opacity:.85,blending:THREE.AdditiveBlending,depthWrite:false})); halo.position.y=-0.2;
+  const thread=new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([new V3(0,0.45,0),new V3(0,-0.04,0)]),
+    new THREE.LineBasicMaterial({color:0xffe9ff,transparent:true,opacity:.55}));
+  const hit=new THREE.Mesh(hitGeo,hitMat); hit.position.y=-0.2; hit.userData.id=msg.id;
+  group.add(thread,core,shell,halo,hit);
+  const base=new V3(slot.x,slot.y,slot.z);
+  group.position.copy(base); group.scale.setScalar(0.0001); group.visible=false;
+  scene.add(group); hitMeshes.push(hit);
+  const o={msg,group,halo,base,aT:slot.t,ph:slot.ph,hover:1,startAt:clock.elapsedTime+delay,color:col,celebrated:!celebrate};
+  orbs.set(msg.id,o); updateCount(); return o;
+}
+
+function removeOrb(id){
+  const o=orbs.get(id); if(!o) return;
+  if(modal.classList.contains('open')&&modal.dataset.id===id) closeModal();
+  scene.remove(o.group);
+  const i=hitMeshes.findIndex(h=>h.userData.id===id); if(i>=0) hitMeshes.splice(i,1);
+  const k=used.findIndex(u=>u.x===o.base.x&&u.y===o.base.y&&u.z===o.base.z); if(k>=0) used.splice(k,1);
+  orbs.delete(id); updateCount();
+}
+
+/* شرارات عند ولادة ثمرة جديدة */
+const bursts=[];
+function burst(pos,color){
+  const n=44,p=new Float32Array(n*3),v=[];
+  for(let i=0;i<n;i++){
+    p[i*3]=pos.x;p[i*3+1]=pos.y;p[i*3+2]=pos.z;
+    const a=Math.random()*6.283,b=Math.acos(2*Math.random()-1),sp=0.6+Math.random()*1.6;
+    v.push(Math.sin(b)*Math.cos(a)*sp,Math.cos(b)*sp+0.6,Math.sin(b)*Math.sin(a)*sp);
+  }
+  const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.BufferAttribute(p,3));
+  const m=new THREE.PointsMaterial({size:0.22,map:glowTex,color:color.clone().multiplyScalar(1.6),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:1});
+  const pts=new THREE.Points(g,m); pts.frustumCulled=false; scene.add(pts); bursts.push({pts,v,age:0});
+}
+
+/* تحليق الكاميرا نحو الثمرة الجديدة */
+let fly=null;
+function flyTo(o){
+  const p=o.group.position.clone(), out=new V3(p.x,0,p.z);
+  if(out.lengthSq()<0.01) out.set(0,0,1); out.normalize();
+  fly={pos:p.clone().addScaledVector(out,7.5).add(new V3(0,1.2,0)),target:p.clone()};
+  controls.autoRotate=false;
+}
+let resumeT; controls.addEventListener('start',()=>{fly=null;controls.autoRotate=false;clearTimeout(resumeT);});
+controls.addEventListener('end',()=>{clearTimeout(resumeT);resumeT=setTimeout(()=>{ if(!matchMedia('(prefers-reduced-motion: reduce)').matches) controls.autoRotate=true; },6000);});
+
+/* ════════════════════════════ التفاعل ════════════════════════════ */
+const $=s=>document.querySelector(s);
+const sheet=$('#sheet'),fab=$('#fab'),txt=$('#text'),nameI=$('#name'),cnt=$('#cnt'),sendB=$('#send'),
+      toast=$('#toast'),tip=$('#tip'),modal=$('#modal'),
+      dock=$('#dock'),rndBtn=$('#rnd'),door=$('#door'),mDel=$('#mDel'),adm=$('#adminModal'),
+      aLogin=$('#aLogin'),aPanel=$('#aPanel'),aList=$('#aList'),aErr=$('#aErr'),aWho=$('#aWho');
+function updateCount(){ $('#count').textContent = orbs.size+' رسالة تتألق على الأغصان'; if(adminState.open&&adminState.user) renderAdminList(); }
+let toastT; function showToast(t){ toast.textContent=t; toast.classList.add('on'); clearTimeout(toastT); toastT=setTimeout(()=>toast.classList.remove('on'),3200); }
+function openSheet(){ sheet.classList.add('open'); dock.classList.add('hide'); setTimeout(()=>txt.focus({preventScroll:true}),380); }
+function closeSheet(){ sheet.classList.remove('open'); dock.classList.remove('hide'); txt.blur(); }
+fab.addEventListener('click',openSheet); $('#sClose').addEventListener('click',closeSheet);
+txt.addEventListener('input',()=>{ cnt.textContent=txt.value.length+' / '+CONFIG.MAX_LEN; });
+
+function fmtDate(ts){ try{ return new Date(ts).toLocaleDateString('ar',{year:'numeric',month:'long',day:'numeric'}); }catch{ return ''; } }
+function openModal(o){
+  $('#mBody').textContent=o.msg.text;                       // textContent: آمن من حقن HTML
+  $('#mFrom').textContent='من: '+(o.msg.name||'مجهول');
+  $('#mDate').textContent=fmtDate(o.msg.ts);
+  modal.dataset.id=o.msg.id; mDel.hidden=!adminState.user;
+  modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); $('#mClose').focus();
+}
+function closeModal(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); }
+$('#mClose').addEventListener('click',closeModal);
+modal.addEventListener('click',e=>{ if(e.target===modal) closeModal(); });
+addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModal(); closeSheet(); closeAdmin(); } });
+
+/* ── زر الرسالة العشوائية ── */
+let lastRand=null, rndT;
+rndBtn.addEventListener('click',()=>{
+  const arr=[...orbs.values()];
+  if(!arr.length){ showToast('لا توجد رسائل بعد 🌙'); return; }
+  let o; do{ o=arr[Math.floor(Math.random()*arr.length)]; }while(arr.length>1&&o.msg.id===lastRand);
+  lastRand=o.msg.id; flyTo(o);
+  clearTimeout(rndT); rndT=setTimeout(()=>openModal(o),1400);
+});
+
+/* ── بوابة المشرف: الدخول عبر Firebase Authentication، والحماية الفعلية في قواعد Firestore ── */
+const adminState={user:null,open:false};
+let authWired=false;
+function closeAdmin(){ adminState.open=false; adm.classList.remove('open'); adm.setAttribute('aria-hidden','true'); }
+function setAdmin(user){
+  adminState.user=user||null;
+  aLogin.hidden=!!user; aPanel.hidden=!user;
+  aWho.textContent=user?(user.email||'مشرف'):'';
+  if(user) renderAdminList();
+}
+function renderAdminList(){
+  aList.textContent='';
+  const items=[...orbs.values()].map(o=>o.msg).sort((a,b)=>b.ts-a.ts);
+  if(!items.length){ const li=document.createElement('li'); li.textContent='لا توجد رسائل.'; aList.append(li); return; }
+  for(const m of items){
+    const li=document.createElement('li'), box=document.createElement('div'), nm=document.createElement('b'),
+          tx=document.createElement('span'), tm=document.createElement('time'), del=document.createElement('button');
+    box.className='m'; nm.textContent=m.name||'مجهول'; tx.textContent=m.text; tm.textContent=fmtDate(m.ts);
+    del.className='del'; del.type='button'; del.textContent='🗑'; del.setAttribute('aria-label','حذف الرسالة');
+    del.addEventListener('click',()=>deleteMessage(m.id));
+    box.append(nm,tx,tm); li.append(box,del); aList.append(li);
+  }
+}
+async function deleteMessage(id){
+  if(!adminState.user) return;
+  if(!confirm('حذف هذه الرسالة نهائيًا من الشجرة لدى الجميع؟')) return;
+  if(id.startsWith('seed')){ removeOrb(id); showToast('أُزيلت الرسالة'); return; }
+  try{
+    await fb.fs.deleteDoc(fb.fs.doc(fb.db,'messages',id));
+    showToast('حُذفت الرسالة 🗑');
+  }catch(e){
+    console.error(e);
+    showToast(e&&e.code==='permission-denied'?'ليست لديك صلاحية الحذف':'تعذّر الحذف، حاول مرة أخرى');
+  }
+}
+async function openAdmin(){
+  adminState.open=true; adm.classList.add('open'); adm.setAttribute('aria-hidden','false'); aErr.textContent='';
+  if(!authWired){
+    aErr.textContent='جارٍ التحميل…';
+    try{
+      const auth=await loadAuth();
+      fb.authMod.onAuthStateChanged(auth,u=>setAdmin(u));
+      authWired=true; aErr.textContent='';
+    }catch(e){ console.error(e); aErr.textContent='تعذّر تحميل نظام الدخول، حاول مرة أخرى'; return; }
+  }
+  if(adminState.user) renderAdminList(); else $('#aEmail').focus();
+}
+door.addEventListener('click',openAdmin);
+$('#aClose').addEventListener('click',closeAdmin);
+adm.addEventListener('click',e=>{ if(e.target===adm) closeAdmin(); });
+aLogin.addEventListener('submit',async e=>{
+  e.preventDefault(); aErr.textContent=''; const go=$('#aGo'); go.disabled=true;
+  try{
+    await fb.authMod.signInWithEmailAndPassword(fb.auth,$('#aEmail').value.trim(),$('#aPass').value);
+    $('#aPass').value='';
+  }catch(err){
+    const c=(err&&err.code)||'';
+    aErr.textContent = c==='auth/too-many-requests' ? 'محاولات كثيرة، انتظر قليلًا ثم أعد المحاولة'
+      : (c==='auth/invalid-credential'||c==='auth/wrong-password'||c==='auth/user-not-found'||c==='auth/invalid-email') ? 'البريد أو كلمة المرور غير صحيحة'
+      : 'تعذّر تسجيل الدخول، حاول مرة أخرى';
+  }finally{ go.disabled=false; }
+});
+$('#aOut').addEventListener('click',()=>fb.authMod.signOut(fb.auth));
+mDel.addEventListener('click',()=>{ const id=modal.dataset.id; if(id) deleteMessage(id); });
+
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+sheet.addEventListener('submit',async e=>{
+  e.preventDefault();
+  const text=txt.value.trim(); if(!text){ txt.focus(); return; }
+  if(fb){                                                   // مهلة قصيرة بين الرسائل لتقليل الإزعاج
+    let last=0; try{ last=+localStorage.getItem('willow-last')||0; }catch{}
+    if(Date.now()-last<20000){ showToast('مهلًا، انتظر لحظات قبل رسالتك التالية 🌙'); return; }
+  }
+  const msg={id:uid(),name:nameI.value.trim().slice(0,24),text:text.slice(0,CONFIG.MAX_LEN),ts:Date.now()};
+  sendB.disabled=true;
+  try{ await Store.add(msg); }
+  catch(err){ console.error(err); removeOrb(msg.id); showToast('تعذّر الحفظ، حاول مرة أخرى'); sendB.disabled=false; return; }
+  if(fb){ try{ localStorage.setItem('willow-last',String(Date.now())); }catch{} }
+  txt.value=''; cnt.textContent='0 / '+CONFIG.MAX_LEN; closeSheet();
+  const o=orbs.get(msg.id)||addOrb(msg,{celebrate:true});
+  if(o){ flyTo(o); showToast('عُلّقت رسالتك على الأغصان ✨'); } else showToast('الشجرة ممتلئة بالضوء حاليًا 🌙');
+  setTimeout(()=>{ sendB.disabled=false; },1500);
+});
+
+/* التقاط الثمار بالمؤشر / اللمس */
+const ray=new THREE.Raycaster(), ptr=new THREE.Vector2();
+function pick(ev){
+  const r=renderer.domElement.getBoundingClientRect();
+  ptr.set(((ev.clientX-r.left)/r.width)*2-1,-((ev.clientY-r.top)/r.height)*2+1);
+  ray.setFromCamera(ptr,camera);
+  const h=ray.intersectObjects(hitMeshes,false);
+  return h.length?orbs.get(h[0].object.userData.id):null;
+}
+let hoverId=null, down=null;
+const cv=renderer.domElement;
+cv.addEventListener('pointerdown',e=>{ down={x:e.clientX,y:e.clientY,t:performance.now()}; });
+cv.addEventListener('pointerup',e=>{
+  if(!down) return;
+  const moved=Math.hypot(e.clientX-down.x,e.clientY-down.y), dt=performance.now()-down.t; down=null;
+  if(moved<8&&dt<700){ const o=pick(e); if(o){ openModal(o); } }
+});
+cv.addEventListener('pointermove',e=>{
+  if(e.pointerType!=='mouse'||e.buttons){ return; }
+  const o=pick(e);
+  hoverId=o?o.msg.id:null;
+  cv.style.cursor=o?'pointer':'grab';
+  if(o){ tip.textContent='رسالة من '+(o.msg.name||'مجهول')+' ✦'; tip.style.left=e.clientX+'px'; tip.style.top=e.clientY+'px'; tip.classList.add('on'); }
+  else tip.classList.remove('on');
+});
+cv.addEventListener('pointerleave',()=>{ hoverId=null; tip.classList.remove('on'); });
+
+/* ════════════════════════════ التوهّج والعرض ════════════════════════════ */
+const rt=new THREE.WebGLRenderTarget(innerWidth*PR,innerHeight*PR,{type:THREE.HalfFloatType,samples:LOW?0:4});
+const composer=new EffectComposer(renderer,rt);
+composer.setPixelRatio(PR); composer.setSize(innerWidth,innerHeight);
+composer.addPass(new RenderPass(scene,camera));
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),LOW?0.7:0.95,0.65,0.9));
+composer.addPass(new OutputPass());
+
+addEventListener('resize',()=>{
+  renderer.setSize(innerWidth,innerHeight); composer.setSize(innerWidth,innerHeight); applyAspect();
+  const w=window.__water; if(w&&w.getRenderTarget){ const f=LOW?0.5:0.8; w.getRenderTarget().setSize(Math.floor(innerWidth*PR*f),Math.floor(innerHeight*PR*f)); }
+});
+
+function frame(){
+  const dt=Math.min(clock.getDelta(),0.05), t=clock.elapsedTime;
+  U.uTime.value=t;
+
+  if(fly){
+    const k=1-Math.pow(0.02,dt);
+    camera.position.lerp(fly.pos,k); controls.target.lerp(fly.target,k);
+    if(camera.position.distanceTo(fly.pos)<0.05) fly=null;
+  }
+  controls.update();
+
+  orbs.forEach(o=>{
+    const age=t-o.startAt;
+    const s=age<0?0:easeOutBack(Math.min(1,age/1.1));
+    if(!o.celebrated&&age>=0){ o.celebrated=true; burst(o.group.position.clone().add(new V3(0,-0.2,0)),o.color); }
+    o.hover+=((hoverId===o.msg.id?1.35:1)-o.hover)*Math.min(1,dt*10);
+    swayOffset(o.base,o.aT,o.ph,t,tmpO);
+    o.group.position.set(o.base.x+tmpO.x,o.base.y,o.base.z+tmpO.z);
+    o.group.scale.setScalar(Math.max(0.0001,s*o.hover));
+    o.group.visible=s>0.001;
+    o.halo.scale.setScalar(1.7*(1+0.18*Math.sin(t*2.1+o.ph)));
+  });
+
+  for(let i=bursts.length-1;i>=0;i--){
+    const b=bursts[i]; b.age+=dt;
+    const p=b.pts.geometry.attributes.position;
+    for(let j=0;j<p.count;j++){
+      b.v[j*3+1]-=1.3*dt;
+      p.setXYZ(j,p.getX(j)+b.v[j*3]*dt,p.getY(j)+b.v[j*3+1]*dt,p.getZ(j)+b.v[j*3+2]*dt);
+    }
+    p.needsUpdate=true; b.pts.material.opacity=Math.max(0,1-b.age/1.6);
+    if(b.age>1.6){ scene.remove(b.pts); b.pts.geometry.dispose(); b.pts.material.dispose(); bursts.splice(i,1); }
+  }
+
+  composer.render();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* ════════════════════════════ تحميل الرسائل ════════════════════════════ */
+const isValid=m=>m&&typeof m.id==='string'&&typeof m.text==='string';
+const clean=m=>({id:m.id,name:String(m.name||'').slice(0,24),text:m.text.slice(0,CONFIG.MAX_LEN),ts:Number(m.ts)||0});
+function loadInitial(list){
+  list.filter(isValid).map(clean).sort((a,b)=>a.ts-b.ts).slice(-CONFIG.MAX_ORBS)
+      .forEach((m,i)=>addOrb(m,{delay:0.6+Math.min(i*0.12,6)}));
+  updateCount();
+}
+(async()=>{
+  if(FIREBASE_CONFIG.projectId){
+    try{
+      await initFirebase();
+      subscribeFirebase(
+        list=>loadInitial(list.length?list:SEED),
+        m=>{ if(isValid(m)) addOrb(clean(m),{celebrate:true}); },
+        id=>removeOrb(id),
+        err=>{ console.warn(err); showToast('تعذّر الاتصال بالشجرة، تحقق من إعدادات Firebase'); }
+      );
+      door.hidden=false;
+      return;
+    }catch(e){
+      console.warn('Firebase init failed, using local storage', e); fb=null;
+      showToast('تعذّر الاتصال بقاعدة البيانات، الرسائل تُحفظ على جهازك فقط');
+    }
+  }
+  let list=[]; try{ list=await Store.list(); }catch(e){ console.warn(e); }
+  if(!Array.isArray(list)||!list.length) list=SEED;
+  loadInitial(list);
+  if(CONFIG.API_URL){
+    setInterval(async()=>{
+      try{ const l=await Store.list(); l.forEach(m=>{ if(m&&m.id&&!orbs.has(m.id)) addOrb(m,{celebrate:true}); }); }catch{}
+    },CONFIG.POLL_MS);
+  }
+})();
+</script>
+</body>
+</html>
